@@ -37,7 +37,7 @@ namespace Infrastructure.Configuration
                   .HasMaxLength(255);
 
             builder.Property(e => e.CreatedAt)
-                  .HasDefaultValueSql("GETUTCDATE()");
+                  .HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
 
             builder.HasIndex(e => e.StripeSessionId).IsUnique();
             builder.HasIndex(e => e.UserId);

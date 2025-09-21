@@ -23,7 +23,7 @@ namespace Infrastructure.Service
 
             try
             {
-                var result = await modelService.RunWorkflowAsync(request);
+                var result = await modelService.RunWorkflowAsync(userId,request);
                 return result;
             }
             catch
@@ -71,7 +71,7 @@ namespace Infrastructure.Service
                 context.CreditTransactions.Add(creditTransaction);
                 await context.SaveChangesAsync();
 
-                var result = await modelService.RunWorkflowAsync(request);
+                var result = await modelService.RunWorkflowAsync(userId,request);
 
                 await transaction.CommitAsync();
                 return result;

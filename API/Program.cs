@@ -13,6 +13,7 @@ using Model.Interface;
 using Models.Interface;
 using Stripe;
 using System.Text;
+using System.Text.Json;
 
 namespace API
 {
@@ -22,23 +23,25 @@ namespace API
         {
             var builder = WebApplication.CreateBuilder(args);
             var config = builder.Configuration;
-            var env = builder.Environment;
-            var useMySql = config.GetValue<bool>("UseMySql"); // set true in Production config
+            //var env = builder.Environment;
+            builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                                // .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
+                                 .AddEnvironmentVariables();
+            
+           // var useMySql = config.GetValue<bool>("UseMySql"); // set true in Production config
 
-            if (useMySql)
-            {
-                // Production: MySQL via Pomelo
-                var mySqlConn = config.GetConnectionString("DefaultConnection");
+            //if (useMySql)
+            //{
+                var mySqlConn = config["ConnectionStrings:DefaultConnection"];
                 builder.Services.AddDbContext<ApplicationDbContext>(options =>
                     options.UseMySql(mySqlConn, ServerVersion.AutoDetect(mySqlConn)));
-            }
-            else
-            {
-                // Development: SQL Server
-                var sqlConn = config.GetConnectionString("DefaultConnection");
-                builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                    options.UseSqlServer(sqlConn));
-            }
+            //}
+            //else
+            //{
+            //    var sqlConn = config["ConnectionStrings:DefaultConnection"];
+            //    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+            //        options.UseSqlServer(sqlConn));
+            //}
             builder.Services.AddHttpClient<IModelService, ModelService>();
             builder.Services.AddScoped<IWorkflowService, WorkflowService>();
 
@@ -98,7 +101,10 @@ namespace API
                 };
                 options.AddSecurityDefinition("Bearer", jwtSecurityScheme);
             });
-
+            Console.WriteLine($"Current Environment: {builder.Environment.EnvironmentName}");
+            Console.WriteLine($"UseMySql: {config.GetValue<bool>("UseMySql")}");
+            Console.WriteLine($"connection string = : {config["ConnectionStrings:DefaultConnection"]}");
+            
 
             builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
             StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
@@ -143,7 +149,11 @@ namespace API
             // HTTP client for external services (if needed later)
             builder.Services.AddHttpClient();
 
-            builder.Services.AddControllers();
+            builder.Services.AddControllers()
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+                });
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
 

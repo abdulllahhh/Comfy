@@ -32,7 +32,7 @@ namespace Infrastructure.Configuration
                   .HasMaxLength(100);
 
             builder.Property(e => e.Timestamp)
-                  .HasDefaultValueSql("GETUTCDATE()");
+                  .HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
 
             builder.HasIndex(e => e.UserId);
             builder.HasIndex(e => e.TransactionType);

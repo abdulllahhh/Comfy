@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Model.Dtos.Request;
+using Model.Dtos.Response;
 using Models.Interface;
 using System.Security.Claims;
 
@@ -20,16 +21,40 @@ namespace API.Controllers
         public async Task<IActionResult> RunModel(WorkflowRequest request)
         {
             Console.WriteLine("starting runmodel");
-            var userIdClaim = User.FindFirstValue(ClaimTypes.Email);
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userIdClaim))
                 return Unauthorized(new { error = "User ID not found in token" });
+
             Console.WriteLine("userid claim " + userIdClaim);
             var userId = userIdClaim;
             Console.WriteLine("user Id " + userId);
+
+
             try
             {
                 var result = await _workflowService.RunModelAsync(userId, request);
-                return Ok(result);
+                if (result is WorkflowResponse response)
+                {
+                    if (response.Success)
+                    {
+                        return Ok(new
+                        {
+                            success = true,
+                            imageData = response.ImageData,
+                            imageFormat = response.ImageFormat
+                        });
+                    }
+                    else
+                    {
+                        return BadRequest(new
+                        {
+                            success = false,
+                            error = response.Error
+                        });
+                    }
+                }
+                return StatusCode(500, new { error = "Unexpected response type" });
+
             }
             catch (UnauthorizedAccessException ex)
             {

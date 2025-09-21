@@ -24,7 +24,9 @@ namespace Infrastructure.Configuration
                   .IsRequired();
 
             builder.Property(e => e.ProcessedAt)
-                  .HasDefaultValueSql("GETUTCDATE()");
+                .HasColumnType("datetime(6)")
+                .HasDefaultValueSql("CURRENT_TIMESTAMP(6)")
+                ;
 
             builder.Property(e => e.UserId)
                   .HasMaxLength(450); // Same as Idbuilder UserId

@@ -6,6 +6,6 @@ namespace Model.Interface
 {
     public interface IModelService
     {
-        Task<WorkflowResponse> RunWorkflowAsync(WorkflowRequest request);
+        Task<WorkflowResponse> RunWorkflowAsync(string Id, WorkflowRequest requestt);
     }
 }

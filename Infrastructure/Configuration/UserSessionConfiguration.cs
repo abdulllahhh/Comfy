@@ -29,7 +29,15 @@ namespace Infrastructure.Configuration
                   .HasMaxLength(512);
 
             builder.Property(e => e.CreatedAt)
-                  .HasDefaultValueSql("GETUTCDATE()");
+                  .HasDefaultValueSql("CURRENT_TIMESTAMP(6)")
+                  .IsRequired()
+                  ;
+            builder.Property(u => u.ExpiresAt).HasColumnType("datetime(6)").IsRequired();
+
+            builder.Property(u => u.IsRevoked)
+                   .HasColumnType("tinyint(1)")
+                   .HasDefaultValue(false)
+                   .IsRequired();
 
             builder.HasIndex(e => e.UserId);
             builder.HasIndex(e => e.RefreshToken).IsUnique();
